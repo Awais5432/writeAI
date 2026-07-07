@@ -1,0 +1,9 @@
+# Hostinger shared hosting — route /app and /login to HTML files
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  RewriteRule ^login/?$ login.html [L]
+  RewriteRule ^app/?$ app.html [L]
+  RewriteRule ^app/.*$ app.html [L]
+</IfModule>

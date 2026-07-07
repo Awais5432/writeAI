@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WriteAI Master Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+  <div id="login-screen" class="login-screen hidden">
+    <div class="login-bg"></div>
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="brand-icon">W</div>
+        <div>
+          <h1>WriteAI</h1>
+          <p>Master Control Panel</p>
+        </div>
+      </div>
+      <form id="login-form">
+        <label>Username</label>
+        <input id="login-username" type="text" autocomplete="username" placeholder="admin" required>
+        <label>Password</label>
+        <input id="login-password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+        <button type="submit" class="btn btn-primary btn-block" id="login-submit">
+          <span>Sign in</span>
+        </button>
+      </form>
+      <p id="login-error" class="login-error hidden"></p>
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon sm">W</div>
+        <div>
+          <strong>WriteAI</strong>
+          <span>Master Panel</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-tab="overview" title="Overview (1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Overview
+        </button>
+        <button class="nav-item" data-tab="analytics" title="Analytics (2)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 5 5-9"/></svg>
+          Analytics
+        </button>
+        <button class="nav-item" data-tab="activity" title="Activity (3)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Activity
+        </button>
+        <button class="nav-item" data-tab="users" title="Users (4)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Users
+        </button>
+        <button class="nav-item" data-tab="subscriptions">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Subscriptions
+        </button>
+        <button class="nav-item" data-tab="usage">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Usage Logs
+        </button>
+        <button class="nav-item" data-tab="models">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          AI Config
+        </button>
+        <button class="nav-item" data-tab="system" title="System (8)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          System
+        </button>
+        <div class="nav-divider"></div>
+        <button class="nav-item" data-tab="account">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Admin Settings
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="admin-chip">
+          <div class="admin-avatar" id="admin-avatar">A</div>
+          <div class="admin-chip-text">
+            <div id="admin-name" class="admin-name">Admin</div>
+            <div id="admin-username" class="admin-username">@admin</div>
+          </div>
+        </div>
+        <button id="logout-btn" class="logout-btn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign out
+        </button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div>
+          <h2 id="page-title">Overview</h2>
+          <p id="page-subtitle" class="subtitle">Platform metrics at a glance</p>
+        </div>
+        <div class="topbar-actions">
+          <span id="live-clock" class="live-clock"></span>
+          <button id="theme-toggle" class="btn btn-ghost btn-icon" type="button" title="Toggle theme (T)">
+            <svg id="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg id="theme-icon-light" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </button>
+          <button id="shortcuts-btn" class="btn btn-ghost btn-icon" type="button" title="Keyboard shortcuts (?)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/></svg>
+          </button>
+          <button id="refresh-btn" class="btn btn-secondary refresh-btn" type="button" title="Reload data (R)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            <span>Refresh</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="content">
+        <section id="tab-overview" class="tab active">
+          <div class="toolbar-row">
+            <select id="overview-days" class="range-select">
+              <option value="7">Last 7 days</option>
+              <option value="14">Last 14 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+          </div>
+          <div id="stats-grid" class="stats-grid"></div>
+          <div class="panel" style="margin-bottom:20px">
+            <div class="panel-header"><h3>Daily Actions</h3></div>
+            <div class="chart-area chart-canvas-wrap"><canvas id="daily-line-chart"></canvas></div>
+          </div>
+          <div class="grid-2">
+            <div class="panel">
+              <div class="panel-header"><h3>Plan Distribution</h3></div>
+              <div class="chart-area chart-canvas-wrap chart-donut"><canvas id="plan-donut-chart"></canvas></div>
+            </div>
+            <div class="panel">
+              <div class="panel-header"><h3>Actions by Type</h3></div>
+              <div id="action-chart" class="chart-area"></div>
+            </div>
+          </div>
+          <div class="panel" style="margin-top:20px">
+            <div class="panel-header"><h3>Actions by Model</h3></div>
+            <div id="model-chart" class="chart-area"></div>
+          </div>
+        </section>
+
+        <section id="tab-analytics" class="tab">
+          <div class="toolbar-row">
+            <select id="analytics-days" class="range-select">
+              <option value="7">Last 7 days</option>
+              <option value="14">Last 14 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+            <a id="export-usage-btn" class="btn btn-secondary btn-sm" href="#">Export usage CSV</a>
+          </div>
+          <div id="analytics-kpis" class="stats-grid stats-grid-3"></div>
+          <div class="grid-2">
+            <div class="panel">
+              <div class="panel-header"><h3>Revenue vs AI Cost</h3></div>
+              <div class="chart-area chart-canvas-wrap"><canvas id="revenue-cost-chart"></canvas></div>
+            </div>
+            <div class="panel">
+              <div class="panel-header"><h3>Cost by Model</h3></div>
+              <div id="cost-by-model" class="chart-area"></div>
+            </div>
+          </div>
+          <div class="panel" style="margin-top:20px">
+            <div class="panel-header"><h3>Top Users by Actions</h3></div>
+            <div id="top-users-table" class="table-area"></div>
+          </div>
+        </section>
+
+        <section id="tab-activity" class="tab">
+          <div class="grid-2">
+            <div class="panel">
+              <div class="panel-header"><h3>Live Activity Feed</h3></div>
+              <div id="activity-feed" class="feed-area"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-header row">
+                <h3>Admin Audit Log</h3>
+                <button type="button" id="audit-refresh" class="btn btn-secondary btn-sm">Refresh</button>
+              </div>
+              <div id="audit-log" class="feed-area"></div>
+              <div id="audit-pagination" class="pagination"></div>
+            </div>
+          </div>
+        </section>
+
+        <section id="tab-users" class="tab">
+          <div class="panel">
+            <div class="panel-header row">
+              <h3>User Management</h3>
+              <div class="filters">
+                <input id="user-search" type="search" placeholder="Search email or name…">
+                <select id="user-plan-filter">
+                  <option value="">All plans</option>
+                  <option value="free">Free</option>
+                  <option value="pro">Pro</option>
+                </select>
+                <a id="export-users-btn" class="btn btn-secondary btn-sm" href="#">Export CSV</a>
+              </div>
+            </div>
+            <div id="users-table" class="table-area"></div>
+            <div id="users-pagination" class="pagination"></div>
+          </div>
+        </section>
+
+        <section id="tab-subscriptions" class="tab">
+          <div class="panel">
+            <div class="panel-header"><h3>Stripe Subscriptions</h3></div>
+            <div id="subscriptions-table" class="table-area"></div>
+          </div>
+        </section>
+
+        <section id="tab-usage" class="tab">
+          <div class="panel">
+            <div class="panel-header row">
+              <h3>Usage Logs</h3>
+              <div class="filters">
+                <input id="usage-search" type="search" placeholder="Filter by email…">
+                <input id="usage-action" type="text" placeholder="Action type">
+                <input id="usage-model" type="text" placeholder="Model">
+                <input id="usage-month" type="month">
+                <button type="button" id="usage-filter-btn" class="btn btn-secondary btn-sm">Apply</button>
+              </div>
+            </div>
+            <div id="usage-table" class="table-area"></div>
+            <div id="usage-pagination" class="pagination"></div>
+          </div>
+        </section>
+
+        <section id="tab-models" class="tab">
+          <div class="grid-2">
+            <div class="panel">
+              <div class="panel-header"><h3>AI Models</h3></div>
+              <form id="settings-form" class="settings-form">
+                <div class="form-grid">
+                  <div class="form-field">
+                    <label>Primary model</label>
+                    <select id="setting-primary"></select>
+                  </div>
+                  <div class="form-field">
+                    <label>Fallback model</label>
+                    <select id="setting-fallback"></select>
+                  </div>
+                </div>
+                <div class="toggle-row">
+                  <label class="toggle-switch toggle-switch-inline" for="setting-gpt-enabled">
+                    <input type="checkbox" id="setting-gpt-enabled">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-label"><span class="toggle-title">OpenAI enabled</span></span>
+                  </label>
+                  <label class="toggle-switch toggle-switch-inline" for="setting-gemini-enabled">
+                    <input type="checkbox" id="setting-gemini-enabled">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-label"><span class="toggle-title">Gemini enabled</span></span>
+                  </label>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">Save model settings</button>
+                </div>
+              </form>
+            </div>
+            <div class="panel panel-fit">
+              <div class="panel-header"><h3>Plan Limits</h3></div>
+              <form id="limits-form" class="settings-form settings-form-compact">
+                <div class="form-field">
+                  <label>Free monthly actions</label>
+                  <input id="setting-free-limit" type="number" min="1" max="1000">
+                  <small>Applies to all free-tier extension users</small>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">Save limits</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="grid-2" style="margin-top:20px">
+            <div class="panel">
+              <div class="panel-header"><h3>API Keys</h3></div>
+              <form id="keys-form" class="settings-form">
+                <div class="form-field">
+                  <label>OpenAI API key <span id="openai-key-hint" class="key-hint"></span></label>
+                  <input id="setting-openai-key" type="password" placeholder="sk-..." autocomplete="off">
+                </div>
+                <div class="form-field">
+                  <label>Gemini API key <span id="gemini-key-hint" class="key-hint"></span></label>
+                  <input id="setting-gemini-key" type="password" placeholder="AIza..." autocomplete="off">
+                </div>
+                <small class="field-note">Leave blank to keep existing key. Falls back to <code>.env</code> if empty.</small>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">Save API keys</button>
+                </div>
+              </form>
+            </div>
+            <div class="panel">
+              <div class="panel-header row">
+                <h3>Custom Models</h3>
+                <button type="button" id="add-model-btn" class="btn btn-secondary btn-sm">+ Add model</button>
+              </div>
+              <form id="custom-models-form" class="settings-form">
+                <div id="custom-models-list" class="custom-models-list"></div>
+                <p class="field-note">Custom models appear in primary/fallback dropdowns after saving.</p>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">Save custom models</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <section id="tab-system" class="tab">
+          <div class="grid-2">
+            <div class="panel">
+              <div class="panel-header row">
+                <h3>System Health</h3>
+                <span id="health-overall" class="health-badge">—</span>
+              </div>
+              <div id="health-checks" class="health-grid"></div>
+              <div id="health-meta" class="health-meta"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-header"><h3>Extension Announcement</h3></div>
+              <form id="announcement-form" class="settings-form">
+                <div class="toggle-field">
+                  <label class="toggle-switch" for="announcement-enabled">
+                    <input type="checkbox" id="announcement-enabled">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-label">
+                      <span class="toggle-title">Show banner in extension</span>
+                      <span class="toggle-desc">Notify all users inside the Chrome popup</span>
+                    </span>
+                  </label>
+                </div>
+                <div class="form-field">
+                  <label>Type</label>
+                  <select id="announcement-type">
+                    <option value="info">Info</option>
+                    <option value="warning">Warning</option>
+                    <option value="success">Success</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label>Message</label>
+                  <textarea id="announcement-message" rows="3" maxlength="500" placeholder="e.g. Scheduled maintenance tonight 10pm UTC"></textarea>
+                  <small>Shown to all extension users when enabled</small>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">Save announcement</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <section id="tab-account" class="tab">
+          <div class="grid-2">
+            <div class="panel panel-fit">
+              <div class="panel-header"><h3>Profile</h3></div>
+              <form id="profile-form" class="settings-form">
+                <div class="form-field">
+                  <label>Display name</label>
+                  <input id="account-display-name" type="text" maxlength="100" required>
+                </div>
+                <div class="form-field">
+                  <label>Username</label>
+                  <input id="account-username" type="text" disabled class="input-disabled">
+                  <small>Username cannot be changed</small>
+                </div>
+                <div class="info-grid">
+                  <div class="info-item">
+                    <span class="info-label">Last login</span>
+                    <span id="account-last-login" class="info-value">—</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">Account created</span>
+                    <span id="account-created" class="info-value">—</span>
+                  </div>
+                  <div class="info-item">
+                    <span class="info-label">Session expires</span>
+                    <span id="account-session" class="info-value">—</span>
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">Save profile</button>
+                </div>
+              </form>
+            </div>
+            <div class="panel panel-fit">
+              <div class="panel-header"><h3>Change password</h3></div>
+              <form id="password-form" class="settings-form">
+                <div class="form-field">
+                  <label>Current password</label>
+                  <input id="account-current-password" type="password" autocomplete="current-password" required>
+                </div>
+                <div class="form-field">
+                  <label>New password</label>
+                  <input id="account-new-password" type="password" autocomplete="new-password" minlength="8" required>
+                  <small>Minimum 8 characters</small>
+                </div>
+                <div class="form-field">
+                  <label>Confirm new password</label>
+                  <input id="account-confirm-password" type="password" autocomplete="new-password" minlength="8" required>
+                </div>
+                <div class="form-actions">
+                  <button type="submit" class="btn btn-primary">Update password</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <div id="app-dialog" class="modal dialog hidden" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+    <div class="modal-backdrop" data-dialog-dismiss></div>
+    <div class="dialog-card">
+      <div id="dialog-icon" class="dialog-icon"></div>
+      <h3 id="dialog-title" class="dialog-title"></h3>
+      <p id="dialog-message" class="dialog-message"></p>
+      <div class="dialog-actions">
+        <button type="button" id="dialog-cancel" class="btn btn-secondary">Cancel</button>
+        <button type="button" id="dialog-confirm" class="btn btn-primary">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="shortcuts-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Keyboard shortcuts</h3>
+        <button type="button" id="shortcuts-close" class="btn btn-ghost btn-sm">✕</button>
+      </div>
+      <div class="shortcut-list">
+        <div><kbd>1</kbd>–<kbd>8</kbd> Switch tabs</div>
+        <div><kbd>R</kbd> Refresh current page</div>
+        <div><kbd>T</kbd> Toggle theme</div>
+        <div><kbd>?</kbd> Show this help</div>
+        <div><kbd>Esc</kbd> Close dialogs</div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="/admin/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WriteAI — App</title>
+  <script>
+    (function () {
+      var t = localStorage.getItem('writeai_web_theme') || 'dark';
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/shared.css">
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="app-sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <a href="/app" class="logo sidebar-brand">
+          <span class="logo-mark">W</span>
+          <span>WriteAI</span>
+        </a>
+        <button class="sidebar-toggle" id="sidebar-toggle" type="button" title="Collapse sidebar">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" id="nav-chat" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          <span>New chat</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-history" id="history-list">
+        <div class="history-label">Recent</div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="account-btn" id="account-btn" type="button" title="Account & settings">
+          <div class="account-avatar" id="sidebar-avatar">A</div>
+          <div class="account-info">
+            <div class="account-name" id="sidebar-name">Account</div>
+            <div class="account-plan" id="sidebar-plan">Free</div>
+          </div>
+          <svg class="account-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <main class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-title">
+          <span id="view-title">Chat</span>
+          <span id="plan-badge" class="badge badge-free">Free</span>
+        </div>
+        <div class="topbar-actions">
+          <button class="theme-toggle" id="theme-toggle" type="button" title="Toggle theme" aria-label="Toggle theme">
+            <svg id="theme-icon-dark" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <svg id="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="extension-banner" id="extension-banner">
+        <span>💡 <strong>Use WriteAI on any site</strong> — install the Chrome extension for in-page editing.</span>
+        <button class="btn btn-secondary" type="button" onclick="alert('Load the unpacked extension from the writeai-extension folder in chrome://extensions')">Install extension</button>
+      </div>
+
+      <!-- Chat view -->
+      <section class="chat-view" id="chat-view">
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-empty" id="chat-empty">
+            <h2>How can we help you today?</h2>
+            <div class="prompt-grid">
+              <button class="prompt-card" data-prompt="Draft a polite follow-up email checking on a job application.">Draft a polite follow-up email checking on a job application.</button>
+              <button class="prompt-card" data-prompt="Write a short LinkedIn post announcing a product launch.">Write a short LinkedIn post announcing a product launch.</button>
+              <button class="prompt-card" data-prompt="Improve this sentence to sound more professional: Thanks for getting back to me so fast.">Improve this sentence to sound more professional.</button>
+              <button class="prompt-card" data-prompt="Summarize the key points of a meeting about Q3 planning.">Summarize the key points of a meeting about Q3 planning.</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-input-wrap">
+          <div class="chat-input-box">
+            <div class="attach-preview hidden" id="attach-preview"></div>
+            <textarea class="chat-textarea" id="chat-input" placeholder="Ask anything…" rows="1"></textarea>
+            <div class="chat-input-tools">
+              <div class="tool-group">
+                <button class="tool-icon-btn" id="attach-btn" type="button" title="Attach file">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                </button>
+                <input type="file" id="file-input" class="hidden" accept="image/*,.txt,.md,.csv,.json,.pdf" multiple>
+                <select class="tool-select" id="model-select" title="AI model">
+                  <option value="">Loading models…</option>
+                </select>
+                <div class="length-group" id="length-group">
+                  <button class="tool-chip" data-length="short" type="button">Short</button>
+                  <button class="tool-chip active" data-length="medium" type="button">Medium</button>
+                  <button class="tool-chip" data-length="long" type="button">Long</button>
+                </div>
+              </div>
+              <button class="btn-send" id="send-btn" type="button" title="Send" disabled>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Settings view -->
+      <section class="settings-view hidden" id="settings-view">
+        <div class="settings-inner">
+          <h1>Settings</h1>
+
+          <div class="settings-card">
+            <h2>Usage this month</h2>
+            <div class="settings-row">
+              <span class="label">Actions used</span>
+              <span class="value" id="usage-text">—</span>
+            </div>
+            <div class="usage-bar-wrap hidden" id="usage-bar-wrap">
+              <div class="usage-bar-fill" id="usage-bar-fill" style="width:0%"></div>
+            </div>
+          </div>
+
+          <div class="settings-card">
+            <h2>Plan & billing</h2>
+            <div class="settings-row">
+              <span class="label">Current plan</span>
+              <span class="value" id="settings-plan">—</span>
+            </div>
+            <div class="settings-actions" id="billing-actions"></div>
+          </div>
+
+          <div class="settings-card">
+            <h2>Account</h2>
+            <div class="settings-row">
+              <span class="label">Name</span>
+              <span class="value" id="settings-name">—</span>
+            </div>
+            <div class="settings-row">
+              <span class="label">Email</span>
+              <span class="value" id="settings-email">—</span>
+            </div>
+            <div class="settings-row">
+              <span class="label">Sign-in method</span>
+              <span class="value">Google</span>
+            </div>
+            <div class="security-note">
+              Your account uses Google Sign-In. Password management is handled through your Google account settings.
+            </div>
+            <div class="settings-actions" style="margin-top:20px">
+              <button class="btn-danger" id="sign-out-btn" type="button">Sign out</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script src="/js/config.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
