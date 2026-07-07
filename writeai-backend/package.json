@@ -10,7 +10,8 @@
     "seed:admin": "node scripts/seed-admin.js",
     "setup": "node scripts/setup.js",
     "docker:up": "docker compose -f ../docker-compose.yml up -d",
-    "docker:down": "docker compose -f ../docker-compose.yml down"
+    "docker:down": "docker compose -f ../docker-compose.yml down",
+    "build:hostinger": "node ../scripts/build-hostinger.js"
   },
   "engines": {
     "node": ">=18"

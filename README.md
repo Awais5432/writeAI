@@ -49,14 +49,46 @@ Open [http://localhost:3000/admin](http://localhost:3000/admin) and sign in with
 - **Usage logs** — per-action history with model and token counts
 - **Models & limits** — toggle GPT/Gemini, set primary/fallback model, free tier limit
 
+## Production deploy (Render API + Neon DB + Hostinger static)
+
+Split setup for shared hosting: **API on Render (free)**, **database on Neon**, **landing/login/app on Hostinger**.
+
+### 1. Render — API only (free)
+
+1. [render.com](https://render.com) → **New** → **Blueprint** → connect [github.com/Awais5432/writeAI](https://github.com/Awais5432/writeAI)
+2. Blueprint uses `plan: free` — no Render Postgres (Neon only)
+3. Set env vars from `deploy/render.env.example` (paste Neon `DATABASE_URL` in Render dashboard only — never commit it)
+4. After first deploy, note URL: `https://writeai-api.onrender.com` (or your service name)
+5. Test: `https://YOUR-API.onrender.com/health`
+6. Admin panel: `https://YOUR-API.onrender.com/admin`
+
+### 2. Google OAuth
+
+| Setting | Value |
+|---------|--------|
+| Authorized JavaScript origins | `https://demo.yourdomain.com` |
+| Redirect URI | `https://YOUR-API.onrender.com/auth/google/callback` |
+
+Update Render env: `GOOGLE_CALLBACK_URL` and `FRONTEND_URL=https://demo.yourdomain.com`
+
+### 3. Hostinger — static frontend
+
+```powershell
+node scripts/build-hostinger.js https://YOUR-API.onrender.com
+```
+
+Upload everything in `deploy/hostinger/` to your demo subdomain folder (`public_html/demo` or similar). `.htaccess` is included for `/login` and `/app` routes.
+
+### 4. Extension (optional)
+
+Set `API_BASE` in `writeai-extension/background/service-worker.js` and `utils/api.js` to your Render URL. Add host permission in `manifest.json`.
+
 ## Production checklist
 
-- [ ] Set strong `JWT_SECRET`
-- [ ] Configure Google OAuth with production callback URL
-- [ ] Add OpenAI + Stripe keys
-- [ ] Set `ADMIN_EMAILS` to your admin Google accounts
-- [ ] Deploy backend (Railway/Render) + run migrations
-- [ ] Update extension `API_BASE` to production URL
-- [ ] Submit extension to Chrome Web Store
+- [ ] Neon `DATABASE_URL` set in Render (not in git)
+- [ ] `FRONTEND_URL` matches Hostinger demo subdomain exactly
+- [ ] Google OAuth callback on API host
+- [ ] `node scripts/build-hostinger.js` + upload to Hostinger
+- [ ] Extension `API_BASE` updated if using extension in demo
 
 See `writeai-engineering-plan.md` for full architecture and API reference.

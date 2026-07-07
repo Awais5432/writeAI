@@ -1,7 +1,9 @@
+# Render Blueprint — API only (free). DB = Neon. Static site = Hostinger.
 services:
   - type: web
     name: writeai-api
     runtime: node
+    plan: free
     rootDir: writeai-backend
     buildCommand: npm install && npm run migrate
     startCommand: node src/server.js
