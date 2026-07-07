@@ -29,9 +29,25 @@ const allowedOrigins = [
   `http://127.0.0.1:${config.port}`
 ].filter(Boolean);
 
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  const normalized = origin.replace(/\/$/, '');
+  if (allowedOrigins.some((o) => o && o.replace(/\/$/, '') === normalized)) {
+    return true;
+  }
+  if (config.frontendUrl) {
+    try {
+      return new URL(origin).host === new URL(config.frontendUrl).host;
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
+
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (isAllowedOrigin(origin)) {
       return callback(null, true);
     }
     callback(new Error('Not allowed by CORS'));
@@ -53,18 +69,24 @@ app.use('/billing', billingRoutes);
 app.use('/user', userRoutes);
 app.use('/admin/api', adminRoutes);
 
-const webRoot = path.join(__dirname, 'web', 'public');
+const webRoot = path.resolve(__dirname, 'web', 'public');
 
-app.get('/login', (req, res) => {
-  res.sendFile(path.join(webRoot, 'login.html'));
+function sendWebPage(res, file, next) {
+  res.sendFile(path.join(webRoot, file), (err) => {
+    if (err) next(err);
+  });
+}
+
+app.get('/login', (req, res, next) => {
+  sendWebPage(res, 'login.html', next);
 });
 
-app.get(/^\/app(\/.*)?$/, (req, res) => {
-  res.sendFile(path.join(webRoot, 'app.html'));
+app.get(/^\/app(\/.*)?$/, (req, res, next) => {
+  sendWebPage(res, 'app.html', next);
 });
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(webRoot, 'index.html'));
+app.get('/', (req, res, next) => {
+  sendWebPage(res, 'index.html', next);
 });
 
 app.use(express.static(webRoot));

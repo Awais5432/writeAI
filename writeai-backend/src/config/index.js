@@ -1,5 +1,9 @@
 require('dotenv').config();
 
+function stripTrailingSlash(url) {
+  return typeof url === 'string' ? url.replace(/\/$/, '') : url;
+}
+
 module.exports = {
   port: parseInt(process.env.PORT, 10) || 3000,
   databaseUrl: process.env.DATABASE_URL,
@@ -11,7 +15,7 @@ module.exports = {
   google: {
     clientId: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackUrl: process.env.GOOGLE_CALLBACK_URL
+    callbackUrl: stripTrailingSlash(process.env.GOOGLE_CALLBACK_URL)
   },
   openaiApiKey: process.env.OPENAI_API_KEY,
   geminiApiKey: process.env.GEMINI_API_KEY,
@@ -20,7 +24,7 @@ module.exports = {
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
     proPriceId: process.env.STRIPE_PRO_PRICE_ID
   },
-  frontendUrl: process.env.FRONTEND_URL,
+  frontendUrl: stripTrailingSlash(process.env.FRONTEND_URL),
   extensionOrigin: process.env.EXTENSION_ORIGIN,
   adminEmails: (process.env.ADMIN_EMAILS || '')
     .split(',')
