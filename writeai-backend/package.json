@@ -11,7 +11,8 @@
     "setup": "node scripts/setup.js",
     "docker:up": "docker compose -f ../docker-compose.yml up -d",
     "docker:down": "docker compose -f ../docker-compose.yml down",
-    "build:hostinger": "node ../scripts/build-hostinger.js"
+    "build:hostinger": "node ../scripts/build-hostinger.js",
+    "zip:hostinger": "node ../scripts/zip-hostinger-node.js"
   },
   "engines": {
     "node": ">=18"
