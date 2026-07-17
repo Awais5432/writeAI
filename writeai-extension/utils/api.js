@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:3000';
+const API_BASE = 'https://writeai.websrowitservices.com';
 
 async function apiFetch(path, options = {}) {
   const { token } = await chrome.storage.local.get('token');

@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:3000';
+const API_BASE = 'https://writeai.websrowitservices.com';
 
 const CONTEXT_ACTIONS = [
   { id: 'fix_grammar', title: 'Fix grammar & spelling' },

@@ -32,6 +32,9 @@ const allowedOrigins = [
 function isAllowedOrigin(origin) {
   if (!origin) return true;
   const normalized = origin.replace(/\/$/, '');
+  if (normalized.startsWith('chrome-extension://')) {
+    return true;
+  }
   if (allowedOrigins.some((o) => o && o.replace(/\/$/, '') === normalized)) {
     return true;
   }
