@@ -4,6 +4,7 @@ let savedRange = null;
 let savedField = null; // { el, start, end } for input/textarea
 let lastAction = null;
 let isEditableSelection = false;
+let dragState = null;
 
 const ICONS = {
   fix_grammar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
@@ -23,10 +24,55 @@ const LABELS = {
 
 const LANGUAGES = ['Spanish', 'French', 'German', 'Urdu', 'Arabic', 'Hindi', 'Chinese', 'Japanese'];
 
+/** User-facing messages only — never show Admin / model / billing details */
+const USER_ERROR_MESSAGES = {
+  free_limit_reached: 'You\'ve used all your free actions this month. Upgrade to Pro for unlimited access.',
+  not_authenticated: 'Please sign in via the WriteAI popup to continue.',
+  account_disabled: 'Your account has been disabled. Please contact support.',
+  user_not_found: 'Please sign in again.',
+  invalid_token: 'Your session expired. Please sign in again.',
+  no_token: 'Please sign in via the WriteAI popup to continue.',
+  ai_quota_exceeded: 'AI is temporarily busy. Please try again in a few seconds.',
+  ai_unavailable: 'AI is temporarily unavailable. Please try again later.',
+  ai_error: 'AI is temporarily busy. Please try again in a few seconds.',
+  network_error: 'Could not reach WriteAI. Please check your connection and try again.'
+};
+
+function friendlyError(response) {
+  if (!response) return USER_ERROR_MESSAGES.ai_error;
+  if (response.error && USER_ERROR_MESSAGES[response.error]) {
+    return USER_ERROR_MESSAGES[response.error];
+  }
+  const msg = response.message || '';
+  // Strip any leaked admin/config wording from older server responses
+  if (/admin|openai|gemini|api key|ai\.google|billing|model/i.test(msg)) {
+    return USER_ERROR_MESSAGES.ai_unavailable;
+  }
+  if (msg) return msg;
+  return USER_ERROR_MESSAGES.ai_error;
+}
+
+/** Strip markdown so Gmail / plain editors don't show ** and * */
+function toPlainText(text) {
+  if (!text) return '';
+  return String(text)
+    .replace(/\r\n/g, '\n')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/__(.+?)__/g, '$1')
+    .replace(/\*([^*\n]+)\*/g, '$1')
+    .replace(/_([^_\n]+)_/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/^\s*[-*+]\s+/gm, '• ')
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 document.addEventListener('mouseup', (e) => {
   if (toolbar?.contains(e.target)) return;
+  if (dragState) return;
 
-  // Let the click settle so the selection is final.
   setTimeout(() => {
     const selection = window.getSelection();
     const text = selection?.toString().trim();
@@ -44,7 +90,6 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') hideToolbar();
 });
 
-// Handle right-click context menu actions coming from the background worker.
 chrome.runtime.onMessage.addListener((msg) => {
   if (msg?.type !== 'CONTEXT_ACTION') return;
   const selection = window.getSelection();
@@ -108,7 +153,7 @@ function showToolbar() {
   toolbar.id = 'writeai-toolbar';
   toolbar.className = 'wa-tb';
   toolbar.innerHTML = `
-    <div class="wa-head">
+    <div class="wa-head" id="wa-drag">
       <div class="wa-brand"><span class="wa-logo">W</span><span>WriteAI</span></div>
       <button class="wa-x" id="wa-close" title="Close (Esc)" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -157,9 +202,8 @@ function showToolbar() {
 
   document.body.appendChild(toolbar);
   positionToolbar();
+  enableDrag(toolbar.querySelector('#wa-drag'));
 
-  // Replace is always available; it swaps the selection in editable fields
-  // and falls back to replacing the current selection elsewhere.
   const replaceBtn = toolbar.querySelector('#wa-replace');
   if (replaceBtn) replaceBtn.hidden = false;
 
@@ -192,14 +236,56 @@ function showToolbar() {
 
   toolbar.querySelector('#wa-copy')?.addEventListener('click', copyResult);
   toolbar.querySelector('#wa-replace')?.addEventListener('click', () => {
-    const text = toolbar.querySelector('#wa-result-text').innerText;
+    const text = toPlainText(toolbar.querySelector('#wa-result-text').innerText);
     replaceSelectedText(text);
     hideToolbar();
   });
   toolbar.querySelector('#wa-regen')?.addEventListener('click', () => {
-    if (lastAction) runAction(lastAction.action, lastAction.extra);
+    if (lastAction) runAction(lastAction.action, lastAction.extra, true);
   });
   toolbar.querySelector('#wa-close')?.addEventListener('click', hideToolbar);
+}
+
+function enableDrag(handle) {
+  if (!handle || !toolbar) return;
+
+  handle.addEventListener('mousedown', (e) => {
+    if (e.button !== 0) return;
+    if (e.target.closest('#wa-close')) return;
+    e.preventDefault();
+
+    const rect = toolbar.getBoundingClientRect();
+    dragState = {
+      offsetX: e.clientX - rect.left,
+      offsetY: e.clientY - rect.top
+    };
+    toolbar.classList.add('wa-dragging');
+
+    const onMove = (ev) => {
+      if (!dragState || !toolbar) return;
+      const margin = 8;
+      const tbW = toolbar.offsetWidth;
+      const tbH = toolbar.offsetHeight;
+      let left = ev.clientX - dragState.offsetX;
+      let top = ev.clientY - dragState.offsetY;
+      left = Math.max(margin, Math.min(left, window.innerWidth - tbW - margin));
+      top = Math.max(margin, Math.min(top, window.innerHeight - tbH - margin));
+      toolbar.style.position = 'fixed';
+      toolbar.style.left = `${left}px`;
+      toolbar.style.top = `${top}px`;
+      toolbar.dataset.dragged = '1';
+    };
+
+    const onUp = () => {
+      dragState = null;
+      toolbar?.classList.remove('wa-dragging');
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
 }
 
 function setActiveAction(action) {
@@ -209,6 +295,8 @@ function setActiveAction(action) {
 }
 
 function positionToolbar() {
+  if (!toolbar || toolbar.dataset.dragged === '1') return;
+
   const rect = getSelectionRect();
   const tbRect = toolbar.getBoundingClientRect();
   const margin = 10;
@@ -231,6 +319,7 @@ function positionToolbar() {
   left = Math.max(margin, Math.min(left, vw - tbRect.width - margin));
   top = Math.max(margin, Math.min(top, vh - tbRect.height - margin));
 
+  toolbar.style.position = 'absolute';
   toolbar.style.top = `${top + window.scrollY}px`;
   toolbar.style.left = `${left + window.scrollX}px`;
 }
@@ -250,7 +339,7 @@ function openLanguagePicker() {
   toolbar.querySelector('#wa-lang-input')?.focus();
 }
 
-async function runAction(action, extra = '') {
+async function runAction(action, extra = '', forceRefresh = false) {
   lastAction = { action, extra };
   setActiveAction(action);
   showBody();
@@ -270,33 +359,27 @@ async function runAction(action, extra = '') {
     type: 'RUN_ACTION',
     action,
     text: selectedText,
-    extra
+    extra,
+    forceRefresh
   });
 
   loading.hidden = true;
 
-  if (!toolbar) return; // closed while waiting
+  if (!toolbar) return;
 
   if (response?.error || !response?.result) {
-    const messages = {
-      free_limit_reached: '⚡ You\'ve used all your free actions this month. Upgrade to Pro for unlimited access.',
-      not_authenticated: '🔐 Please sign in via the WriteAI popup to continue.',
-      ai_quota_exceeded: '⏳ AI quota reached. Please wait a moment and try again.',
-      no_gemini_key: '🔑 Gemini API key missing. Add it in the admin panel.',
-      no_openai_key: '🔑 OpenAI not configured. Add a key in the admin panel.',
-      network_error: '📡 Could not reach WriteAI. Is the server running?'
-    };
-    error.textContent = response?.message || messages[response?.error] || '❌ Something went wrong. Please try again.';
+    error.textContent = friendlyError(response);
     error.hidden = false;
   } else {
-    toolbar.querySelector('#wa-result-text').innerText = response.result;
+    const plain = toPlainText(response.result);
+    toolbar.querySelector('#wa-result-text').innerText = plain;
     result.hidden = false;
   }
   positionToolbar();
 }
 
 function copyResult() {
-  const text = toolbar.querySelector('#wa-result-text').innerText;
+  const text = toPlainText(toolbar.querySelector('#wa-result-text').innerText);
   const btn = toolbar.querySelector('#wa-copy');
   const label = btn.querySelector('span');
   navigator.clipboard.writeText(text).then(() => {
@@ -311,19 +394,19 @@ function copyResult() {
 }
 
 function replaceSelectedText(replacement) {
-  // Input / textarea fields
+  const text = toPlainText(replacement);
+
   if (savedField && savedField.el) {
     const { el, start, end } = savedField;
     const value = el.value;
-    el.value = value.slice(0, start) + replacement + value.slice(end);
+    el.value = value.slice(0, start) + text + value.slice(end);
     el.dispatchEvent(new Event('input', { bubbles: true }));
     el.focus();
-    const caret = start + replacement.length;
-    try { el.setSelectionRange(caret, caret); } catch { /* number inputs, etc. */ }
+    const caret = start + text.length;
+    try { el.setSelectionRange(caret, caret); } catch { /* ignore */ }
     return;
   }
 
-  // contentEditable / normal DOM ranges
   const sel = window.getSelection();
   if (savedRange) {
     sel.removeAllRanges();
@@ -332,7 +415,7 @@ function replaceSelectedText(replacement) {
   if (!sel.rangeCount) return;
   const range = sel.getRangeAt(0);
   range.deleteContents();
-  range.insertNode(document.createTextNode(replacement));
+  range.insertNode(document.createTextNode(text));
   sel.collapseToEnd();
 }
 
@@ -341,5 +424,6 @@ function hideToolbar() {
   toolbar.classList.add('wa-closing');
   const el = toolbar;
   toolbar = null;
+  dragState = null;
   setTimeout(() => el.remove(), 120);
 }

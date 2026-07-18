@@ -558,16 +558,52 @@
     el.style.height = Math.min(el.scrollHeight, 160) + 'px';
   }
 
+  function toggleAccountMenu() {
+    const wrap = $('account-menu-wrap');
+    const menu = $('account-menu');
+    const btn = $('account-btn');
+    const open = menu.hidden;
+    menu.hidden = !open;
+    wrap.classList.toggle('is-open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  function closeAccountMenu() {
+    const wrap = $('account-menu-wrap');
+    const menu = $('account-menu');
+    const btn = $('account-btn');
+    if (!menu || menu.hidden) return;
+    menu.hidden = true;
+    wrap?.classList.remove('is-open');
+    btn?.setAttribute('aria-expanded', 'false');
+  }
+
+  function signOut() {
+    WriteAIApi.setToken('');
+    location.href = '/login';
+  }
+
   function bindEvents() {
     $('nav-chat').addEventListener('click', newChat);
-    $('account-btn').addEventListener('click', showSettings);
-    $('sign-out-btn').addEventListener('click', () => {
-      WriteAIApi.setToken('');
-      location.href = '/login';
+    $('account-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleAccountMenu();
+    });
+    $('menu-settings-btn')?.addEventListener('click', () => {
+      closeAccountMenu();
+      showSettings();
+    });
+    $('menu-logout-btn')?.addEventListener('click', signOut);
+    $('sign-out-btn').addEventListener('click', signOut);
+
+    document.addEventListener('click', (e) => {
+      const wrap = $('account-menu-wrap');
+      if (wrap && !wrap.contains(e.target)) closeAccountMenu();
     });
 
     $('sidebar-toggle').addEventListener('click', () => {
       $('sidebar').classList.toggle('collapsed');
+      closeAccountMenu();
     });
 
     $('theme-toggle')?.addEventListener('click', toggleTheme);

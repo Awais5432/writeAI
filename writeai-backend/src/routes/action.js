@@ -19,14 +19,15 @@ router.post('/',
   [
     body('action').isIn(VALID_ACTIONS),
     body('text').isString().isLength({ min: 1, max: 8000 }),
-    body('extra').optional().isString().isLength({ max: 200 })
+    body('extra').optional().isString().isLength({ max: 200 }),
+    body('forceRefresh').optional().isBoolean()
   ],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
     const { userId, plan } = req.user;
-    const { action, text, extra } = req.body;
+    const { action, text, extra, forceRefresh } = req.body;
 
     const allowed = await canPerformAction(userId, plan);
     if (!allowed) {
@@ -41,12 +42,19 @@ router.post('/',
     }
 
     try {
-      const { result, model, input_tokens, output_tokens } = await runAction(action, text, extra);
+      const { result, model, input_tokens, output_tokens, cached } = await runAction(
+        action,
+        text,
+        extra,
+        { forceRefresh: !!forceRefresh }
+      );
 
-      incrementCount(userId).catch(console.error);
-      logUsage(userId, action, model, input_tokens, output_tokens).catch(console.error);
+      if (!cached) {
+        incrementCount(userId).catch(console.error);
+        logUsage(userId, action, model, input_tokens, output_tokens).catch(console.error);
+      }
 
-      res.json({ result, model });
+      res.json({ result, model, cached: !!cached });
     } catch (err) {
       console.error('Action failed:', err);
       const parsed = parseAiError(err);

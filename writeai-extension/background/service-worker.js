@@ -108,7 +108,7 @@ async function apiFetch(path, options = {}) {
   return { ok: res.ok, status: res.status, data };
 }
 
-async function handleAction({ action, text, extra }) {
+async function handleAction({ action, text, extra, forceRefresh }) {
   const token = await getToken();
 
   if (!token) {
@@ -119,11 +119,11 @@ async function handleAction({ action, text, extra }) {
   try {
     const { ok, data } = await apiFetch('/action', {
       method: 'POST',
-      body: JSON.stringify({ action, text, extra })
+      body: JSON.stringify({ action, text, extra, forceRefresh: !!forceRefresh })
     });
 
     if (!ok) return { error: data.error, message: data.message };
-    return { result: data.result };
+    return { result: data.result, cached: data.cached };
   } catch (err) {
     return { error: 'network_error' };
   }
