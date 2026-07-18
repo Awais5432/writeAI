@@ -7,3 +7,5 @@ Thumbs.db
 deploy/hostinger/
 deploy/writeai-backend-staging/
 deploy/*.zip
+writeai-extension.zip
+*.zip
